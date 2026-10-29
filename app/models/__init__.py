@@ -1,4 +1,29 @@
-"""包标记：让 Python 把这一层当成包，而不是普通文件夹。
+from app.models.knowledge import KbArticle, KbCategory
+from app.models.support import LlmLog, OperationLog, SystemConfig
 
-空着也行，但建着更规范 —— 以后要在这个包里统一导出东西时，就写在这里。
-"""
+from app.models.conversation import Conversation, Message
+from app.models.feedback import QaReport, Rating
+from app.models.ticket import Ticket, TicketLog
+from app.models.associations import role_permissions, user_roles
+from app.models.role import Permission, Role
+from app.models.user import User, UserStatus
+
+__all__ = [
+    "User",
+    "UserStatus",
+    "Role",
+    "Permission",
+    "user_roles",
+    "role_permissions",
+    "Conversation",
+    "Message",
+    "QaReport",
+    "Rating",
+    "Ticket",
+    "TicketLog",
+    "KbArticle",
+    "KbCategory",
+    "LlmLog",
+    "OperationLog",
+    "SystemConfig",
+]
