@@ -6,8 +6,8 @@ class LoginRequest(BaseModel):
 
 class TokenOut(BaseModel):
     access_token:str
-    token_tyre:str = "bearer"
-    expires_in = int #有效期
+    token_type:str = "bearer"
+    expires_in: int #有效期
 
 class MeOut(BaseModel):
     id:int
