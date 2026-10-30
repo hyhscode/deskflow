@@ -43,7 +43,7 @@ class TokenError(Exception):
     pass
 
 def _b64url_encode(raw:bytes) -> str:
-    return base64.urlsafe_b64decode(raw).rstrip(b"=").decode("ascii")
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
 
 def _b64url_decode(text:str) -> bytes:
     padding = "=" *(-len(text) % 4)
