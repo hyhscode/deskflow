@@ -7,6 +7,7 @@ from app.models.ticket import Ticket, TicketLog
 from app.models.associations import role_permissions, user_roles
 from app.models.role import Permission, Role
 from app.models.user import User, UserStatus
+from app.models.preset import PresetQa
 
 __all__ = [
     "User",
@@ -26,4 +27,5 @@ __all__ = [
     "LlmLog",
     "OperationLog",
     "SystemConfig",
+    "PresetQa"
 ]
