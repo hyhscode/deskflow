@@ -24,14 +24,14 @@ def search_presets(db: Session, query: str, top_k: int = TOP_K) -> list[PresetHi
 
         if matched:
             scored.append((len(matched), preset.sort_order, -preset.ask_count, preset, matched))
-            scored.sort(key=lambda item: (item[0], item[1], item[2]), reverse=False)
+        scored.sort(key=lambda item: (-item[0], item[1], item[2]), reverse=False)
 
-            return [
-        PresetHit(
-            preset_id=preset.id,
-            question=preset.question,
-            answer=preset.answer,
-            matched_keywords=matched,
+        return [
+            PresetHit(
+                preset_id=preset.id,
+                question=preset.question,
+                answer=preset.answer,
+                matched_keywords=matched,
         )
         for _, _, _, preset, matched in scored[:top_k]
     ]
