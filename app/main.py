@@ -30,6 +30,4 @@ def health():
 app.include_router(health_router)
 
 app.include_router(auth.router)
-app.include_router(health_router)
-app.include_router(auth.router)
 app.include_router(chat.router)

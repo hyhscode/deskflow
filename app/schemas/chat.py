@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class ChatMessageIn(BaseModel):
     visitor_key:str
@@ -14,3 +15,4 @@ class ChatMessageOut(BaseModel):
     content: str = ""                                      
     suggestions: list[SuggestionOut] = []                  
     citation: str | None = None
+    created_at:datetime
