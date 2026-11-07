@@ -15,4 +15,12 @@ class ChatMessageOut(BaseModel):
     content: str = ""                                      
     suggestions: list[SuggestionOut] = []                  
     citation: str | None = None
-    created_at:datetime
+
+
+class MessageOut(BaseModel):
+    """一条历史消息。"""
+    id: int
+    sender: str
+    content: str
+    content_type: str
+    created_at: datetime

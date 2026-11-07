@@ -7,8 +7,6 @@ from app.schemas.chat import ChatMessageIn, ChatMessageOut, MessageOut, Suggesti
 from app.services.chat_svc import handle_and_save
 
 from app.db.session import get_db
-from app.schemas.chat import ChatMessageIn,ChatMessageOut,SuggestionOut
-from app.services.pipeline import handle_message
 
 router = APIRouter(prefix="/api/chat", tags=["访客端"])
 
@@ -25,7 +23,7 @@ def send_message(data:ChatMessageIn,db:Session = Depends(get_db)):
         citation=result.citation,
     )
 
-@router.get("/history",response_model=list[Message])
+@router.get("/history", response_model=list[MessageOut])
 def get_history(visitor_key:str,db:Session = Depends(get_db)):
     conv = db.execute(
         select(Conversation)

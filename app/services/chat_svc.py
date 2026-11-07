@@ -18,7 +18,7 @@ def get_or_create_conversation(db:Session,visitor_key:str) -> tuple[Conversation
             Conversation.visitor_key == visitor_key,
             Conversation.status == "open",
     ).order_by(Conversation.id.desc())
-    ).scalar().first()
+    ).scalars().first()
 
     if conv is not None:
         return conv, False
