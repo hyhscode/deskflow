@@ -1,7 +1,7 @@
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from fastapi import APIRouter,FastAPI
-from app.routers import auth,chat
+from app.routers import auth,chat,desk
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -31,3 +31,4 @@ app.include_router(health_router)
 
 app.include_router(auth.router)
 app.include_router(chat.router)
+app.include_router(desk.router)

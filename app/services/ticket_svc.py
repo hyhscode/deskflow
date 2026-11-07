@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Ticket, TicketLog, User
+from app.models import Ticket, TicketLog, User,Message
 from app.services.assign import pick_assignee
 
 TRANSITIONS: dict[str, set[str]] = {
@@ -88,3 +89,47 @@ def change_status(
         to_value={"status": target},
     ))
     return ticket
+
+DATA_SCOPE_ALL = "ticket:read_all"
+
+def reply_ticket(db: Session, ticket: Ticket, agent: User, content: str) -> Message:
+    msg = Message(
+        conversation_id=ticket.conversation_id,
+        sender="agent",
+        agent_id=agent.id,
+        content=content,
+        content_type="text",
+    )
+    db.add(msg)
+    db.flush()
+
+    if ticket.first_response_at is None:
+        ticket.first_response_at = datetime.now(timezone.utc)
+
+    # 派出去的单，客服一回复就说明开始处理了
+    if ticket.status == "assigned":
+        change_status(db, ticket, "processing", operator_id=agent.id)
+
+    db.add(TicketLog(
+        ticket_id=ticket.id,
+        operator_id=agent.id,
+        action="reply",
+        to_value={"message_id": msg.id},
+    ))
+    return msg
+
+def list_tickets(
+    db: Session,
+    user: User,
+    permissions: list[str],
+    status: str | None = None,
+) -> list[Ticket]:
+    stmt = select(Ticket)
+
+    if DATA_SCOPE_ALL not in permissions:
+        stmt = stmt.where(Ticket.assignee_id == user.id)
+
+    if status:
+        stmt = stmt.where(Ticket.status == status)
+
+    return db.execute(stmt.order_by(Ticket.created_at.desc())).scalars().all()
