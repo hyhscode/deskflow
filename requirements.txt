@@ -24,3 +24,7 @@ python-dotenv==1.2.4      # 让 .env 里的变量能被读到
 # --- 测试 ---
 pytest==9.2.0             # 单元测试
 httpx==0.28.1             # 测试里模拟 HTTP 请求（FastAPI TestClient 依赖它）
+
+
+langchain-core=1.7.6
+langchain-openai=1.7.4
