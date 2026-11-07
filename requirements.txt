@@ -26,5 +26,8 @@ pytest==9.2.0             # 单元测试
 httpx==0.28.1             # 测试里模拟 HTTP 请求（FastAPI TestClient 依赖它）
 
 
-langchain-core=1.7.6
-langchain-openai=1.7.4
+langchain-core==1.7.6
+langchain-openai==1.7.4
+
+langchain==1.4.9
+langgraph==1.2.20

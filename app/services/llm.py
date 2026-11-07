@@ -83,3 +83,6 @@ def run_structured(
     if result is None:
         raise LLMError("结构化输出解析失败")
     return result
+
+def build_chat_model(temperature: float = 0.0, max_tokens: int = 800) -> ChatOpenAI:
+    return _build_llm(temperature, max_tokens)
