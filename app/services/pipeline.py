@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.services.answer import answer_with_kb
-from app.services.kb_search import search_kb
+from app.services.kb_search import search_kb_hybrid
 from app.services.preset_search import search_presets
 
 class PipelineResult(BaseModel):
@@ -23,7 +23,7 @@ def handle_message(db:Session,question:str) -> PipelineResult:
             ],
         )
 
-    kb = search_kb(db,question)
+    kb = search_kb_hybrid(db,question)
     if kb.tier == "suggest":
         answer = answer_with_kb(question,kb.hits,db=db)
         return PipelineResult(

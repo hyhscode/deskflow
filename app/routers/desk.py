@@ -20,6 +20,13 @@ from app.services.ticket_svc import (
     list_tickets,
     reply_ticket,
 )
+from app.models import Message, QaReport, Ticket, User
+from app.schemas.desk import (
+    DraftIn, DraftOut, QaOut, ReplyIn, ReviewIn,
+    StatusIn, SummaryOut, TicketDetailOut, TicketOut,
+)
+from app.services.assist import draft_reply, review_qa, score_qa, summarize_ticket
+
 
 router = APIRouter(prefix="/api/desk", tags=["客服端·工单"])
 
@@ -139,3 +146,78 @@ def post_status(
 
     db.commit()
     return TicketOut.model_validate(ticket, from_attributes=True)
+
+@router.post("/tickets/{ticket_id}/draft", response_model=DraftOut)
+def post_draft(
+    ticket_id: int,
+    data: DraftIn,
+    user: User = Depends(require_perm("ticket:read")),
+    db: Session = Depends(get_db),
+):
+    """生成回复草稿。客服点一下，框里出现一段话，改完自己发。"""
+    ticket = _get_ticket_or_404(db, ticket_id)
+    _ensure_can_access(ticket, user)
+
+    result = draft_reply(db, ticket, data.instruction)
+    db.commit()      # 提交是为了把 llm_logs 落盘
+
+    return DraftOut(**result)
+
+
+@router.post("/tickets/{ticket_id}/summarize", response_model=SummaryOut)
+def post_summarize(
+    ticket_id: int,
+    user: User = Depends(require_perm("ticket:read")),
+    db: Session = Depends(get_db),
+):
+    """生成工单摘要，写进 tickets.summary。
+
+    这个接口没有请求体：前端发一个空 body 即可（POST 允许无 body）。
+    """
+    ticket = _get_ticket_or_404(db, ticket_id)
+    _ensure_can_access(ticket, user)
+
+    summary = summarize_ticket(db, ticket)
+    db.commit()
+    return SummaryOut(summary=summary)
+
+
+@router.post("/tickets/{ticket_id}/qa", response_model=QaOut)
+def post_qa(
+    ticket_id: int,
+    user: User = Depends(require_perm("qa:review")),
+    db: Session = Depends(get_db),
+):
+    """跑一次 AI 质检。需要 qa:review（主管）。"""
+    ticket = _get_ticket_or_404(db, ticket_id)
+
+    report = score_qa(db, ticket)
+    db.commit()
+
+    return QaOut(
+        id=report.id, ticket_id=report.ticket_id, score=report.score,
+        dimensions=report.dimensions or {}, comment=report.comment,
+        reviewed=report.reviewed,
+    )
+
+
+@router.post("/qa/{report_id}/review", response_model=QaOut)
+def post_qa_review(
+    report_id: int,
+    data: ReviewIn,
+    user: User = Depends(require_perm("qa:review")),
+    db: Session = Depends(get_db),
+):
+    """人工复核。给了 human_score 就做分差检测。"""
+    report = db.get(QaReport, report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="质检报告不存在")
+
+    review_qa(db, report, user.id, data.human_score, data.comment)
+    db.commit()
+
+    return QaOut(
+        id=report.id, ticket_id=report.ticket_id, score=report.score,
+        dimensions=report.dimensions or {}, comment=report.comment,
+        reviewed=report.reviewed,
+    )

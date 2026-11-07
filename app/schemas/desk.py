@@ -31,3 +31,31 @@ class ReplyIn(BaseModel):
 class StatusIn(BaseModel):
 
     target: str
+
+class DraftIn(BaseModel):
+    """生成草稿时可选附加要求。"""
+    instruction: str | None = None
+
+
+class DraftOut(BaseModel):
+    draft: str
+    citations: list[dict] = []
+    source: str            # llm / fallback
+
+
+class SummaryOut(BaseModel):
+    summary: str
+
+
+class QaOut(BaseModel):
+    id: int
+    ticket_id: int
+    score: int
+    dimensions: dict
+    comment: str | None
+    reviewed: bool
+
+
+class ReviewIn(BaseModel):
+    human_score: int | None = None
+    comment: str | None = None
